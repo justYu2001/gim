@@ -25,7 +25,6 @@
     "autoprefixer": "^10.4.7",
     "eslint": "^8.34.0",
     "eslint-config-next": "^13.2.1",
-    "msw": "^1.1.0",
     "node-mocks-http": "^1.12.2",
     "postcss": "^8.4.14",
     "prettier": "^2.8.1",
@@ -37,8 +36,5 @@
   },
   "ct3aMetadata": {
     "initVersion": "7.8.0"
-  },
-  "msw": {
-    "workerDirectory": "public"
   }
 }
