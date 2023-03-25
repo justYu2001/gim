@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 import SignInButton from "@/components/auth/SignInButton";
+import SighOutButton from "@/components/auth/SignOutButton";
 import Logo from "public/images/logo.png";
 
 const Header = () => {
@@ -21,6 +22,8 @@ const Header = () => {
             </Link>
 
             {router.pathname === "/" && <SignInButton theme="light" />}
+
+            {router.pathname.startsWith("/task") && <SighOutButton />}
         </header>
     );
 };
