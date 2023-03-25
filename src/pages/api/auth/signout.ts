@@ -4,9 +4,7 @@ import { withSessionRoute } from "@/utils/session";
 
 const signOutApiHandler: NextApiHandler = (request, response) => {
     if (request.method !== "POST") {
-        return response.status(405).send({
-            message: "Method Not Allowed",
-        });
+        return response.status(405).send({ message: "Method Not Allowed" });
     }
 
     try {
