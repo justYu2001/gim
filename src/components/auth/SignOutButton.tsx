@@ -1,11 +1,18 @@
-const SighOutButton = () => {
+import type { ReactNode } from "react";
+
+interface SighOutButtonProps {
+    className?: string;
+    children: ReactNode;
+}
+
+const SighOutButton = ({ className = "", children }: SighOutButtonProps) => {
     return (
         <form action="/api/auth/signout" method="POST">
             <button
                 type="submit"
-                className="font-medium tracking-wide text-slate-400"
+                className={className}
             >
-                登出
+                {children}
             </button>
         </form>
     );

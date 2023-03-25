@@ -9,6 +9,15 @@ import bundleAnalyzer from "@next/bundle-analyzer";
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        port: "",
+      }
+    ],
+  },
 
   /**
    * If you have the "experimental: { appDir: true }" setting enabled, then you
