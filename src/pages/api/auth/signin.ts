@@ -39,7 +39,7 @@ const signInApiHandler: NextApiHandler = (request, response) => {
             });
         }
 
-        return response.redirect("/error");
+        return response.redirect(302, "/error");
     }
 };
 
