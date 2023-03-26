@@ -14,9 +14,7 @@ import { formatZodErrors } from "@/utils/zod";
  */
 const callbackApiHandler: NextApiHandler = async (request, response) => {
     if (request.method !== "GET") {
-        return response.status(405).send({
-            message: "Method Not Allowed",
-        });
+        return response.status(405).send({ message: "Method Not Allowed" });
     }
 
     try {

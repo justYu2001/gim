@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 
 import SignInButton from "@/components/auth/SignInButton";
 import SighOutButton from "@/components/auth/SignOutButton";
+import UserAvatar from "@/components/user/UserAvatar";
 import Logo from "public/images/logo.png";
 
 const Header = () => {
@@ -23,7 +24,14 @@ const Header = () => {
 
             {router.pathname === "/" && <SignInButton theme="light" />}
 
-            {router.pathname.startsWith("/task") && <SighOutButton />}
+            {router.pathname.startsWith("/task") && (
+                <div className="flex items-center space-x-4">
+                    <UserAvatar />
+                    <SighOutButton className="font-medium tracking-wide text-slate-400">
+                        登出
+                    </SighOutButton>
+                </div>
+            )}
         </header>
     );
 };
