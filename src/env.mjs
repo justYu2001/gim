@@ -9,6 +9,7 @@ const server = z.object({
   CLIENT_ID: z.string().min(1),
   CLIENT_SECRET: z.string().min(1),
   SECRET_COOKIE_PASSWORD: z.string().min(32),
+  ADMIN_ACCESS_TOKEN: z.string().startsWith("ghp_"),
 });
 
 /**
@@ -30,6 +31,7 @@ const processEnv = {
   CLIENT_ID: process.env.CLIENT_ID,
   CLIENT_SECRET: process.env.CLIENT_SECRET,
   SECRET_COOKIE_PASSWORD: process.env.SECRET_COOKIE_PASSWORD,
+  ADMIN_ACCESS_TOKEN: process.env.ADMIN_ACCESS_TOKEN,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 
