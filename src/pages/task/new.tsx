@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -25,14 +26,16 @@ const NewTaskPage: NextPage = () => {
         resolver: zodResolver(newTaskSchema),
     });
 
-    const { reset, setError } = formMethods;
+    const { setError } = formMethods;
+
+    const router = useRouter();
 
     const { mutate, isLoading } = useAddTask();
 
     const handleFormSubmit: FormSubmitHandler<NewTask> = (data) => {
         mutate(data, {
             onSuccess: () => {
-                reset();
+                void router.push("/");
             },
             onError: () => {
                 setError("root", {
