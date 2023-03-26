@@ -23,7 +23,7 @@ const AddTaskButton = () => {
     return (
         <Link
             href="/task/new"
-            className="flex w-9 items-center justify-center rounded-md bg-purple-400 font-medium tracking-wide text-white md:inline md:w-auto md:py-2 md:px-4"
+            className="flex h-9 w-9 items-center justify-center rounded-md bg-purple-400 font-medium tracking-wide text-white md:inline md:h-auto md:w-auto md:py-2 md:px-4"
         >
             <span className="hidden md:inline">新增任務</span>
             <HiOutlinePlus className="text-2xl md:hidden" />
