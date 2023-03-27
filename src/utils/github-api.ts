@@ -50,7 +50,7 @@ export const updateGithubIssue = async (id: number, payload: GithubUpdateIssueAp
     return convertGithubIssueToTask(data);
 };
 
-const convertGithubIssueToTask = (issue: GithubIssue): Task => {
+export const convertGithubIssueToTask = (issue: GithubIssue): Task => {
     return {
         id: issue.number,
         title: issue.title,

@@ -51,7 +51,7 @@ export const githubApiHandler = (handlers: GithubApiMethodHandler) => {
     return withSessionRoute(apiHandler);
 };
 
-interface GithubApiHandlerErrorMessage {
+export interface GithubApiHandlerErrorMessage {
     message: string;
     documentation_url?: string;
 }
