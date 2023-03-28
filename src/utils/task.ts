@@ -12,3 +12,6 @@ export interface Task {
     body: string;
     status: Status;
 }
+
+export const TaskStatuses = ["Open", "In Progress", "Done"] as const;
+export type TaskStatus = typeof TaskStatuses[number];
