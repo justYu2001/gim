@@ -1,12 +1,18 @@
+import { Suspense, lazy } from "react";
 import type { NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import { MdEdit } from "react-icons/md";
+
+import useModal from "@/hooks/modal";
 import { useTask } from "@/hooks/task";
 import type { Task } from "@/utils/task";
 import EmptyImage from "public/images/empty.png";
 import ErrorImage from "public/images/error.png";
+
+const EditTaskModal = lazy(() => import("@/components/task/EditTaskModal"));
 
 const TaskDetailPage: NextPage = () => {
     const router = useRouter();
@@ -35,9 +41,14 @@ const TaskDetailSkeleton = () => {
     return (
         <>
             <div className="flex items-end justify-between border-b border-slate-300 pb-2 pr-2">
-                <div className="flex items-end">
+                <div className="flex w-full flex-col-reverse">
                     <div className="mt-1 h-8 w-36 rounded-full bg-slate-300" />
-                    <span className="ml-2 h-6 w-16 rounded-full bg-slate-300" />
+
+                    <div className="mb-4 flex items-end justify-between">
+                        <span className="h-6 w-16 rounded-full bg-slate-300" />
+
+                        <EditButton />
+                    </div>
                 </div>
             </div>
 
@@ -79,25 +90,50 @@ interface TaskDetailProps {
 }
 
 const TaskDetail = ({ task }: TaskDetailProps) => {
+    const [isOpen, toggleModal] = useModal();
+
     return (
         <>
-            <div className="flex items-end justify-between border-b border-slate-300 pb-2 pr-2">
-                <div className="flex items-end">
-                    <h1 className="text-4xl font-medium tracking-wide">
+            <div className="flex border-b border-slate-300 pb-2 pr-2 md:items-end md:justify-between">
+                <div className="flex w-full flex-col-reverse">
+                    <h1 className="break-all text-4xl font-medium tracking-wide">
                         {task.title}
                     </h1>
 
-                    <span
-                        style={{ backgroundColor: `#${task.status.color}` }}
-                        className="ml-2 inline-block -translate-y-1 rounded-full py-0.5 px-3 text-sm font-medium text-white"
-                    >
-                        {task.status.name}
-                    </span>
+                    <div className="mb-3 flex items-end justify-between">
+                        <span
+                            style={{ backgroundColor: `#${task.status.color}` }}
+                            className="inline-block rounded-full py-0.5 px-3 text-sm font-medium text-white"
+                        >
+                            {task.status.name}
+                        </span>
+
+                        <EditButton onClick={toggleModal} />
+                    </div>
                 </div>
             </div>
 
             <pre className="whitespace-pre-wrap px-0.5 py-4">{task.body}</pre>
+
+            <Suspense>
+                <EditTaskModal isOpen={isOpen} task={task} onClose={toggleModal} />
+            </Suspense>
         </>
+    );
+};
+
+interface EditButtonProps {
+    onClick?: () => void;
+}
+
+const EditButton = ({ onClick }: EditButtonProps) => {
+    return (
+        <button
+            className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-400 text-xl text-slate-400 hover:bg-black/10"
+            onClick={onClick}
+        >
+            <MdEdit />
+        </button>
     );
 };
 

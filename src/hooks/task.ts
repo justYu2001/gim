@@ -3,13 +3,13 @@ import type { QueryFunctionContext } from "@tanstack/react-query";
 import axios from "axios";
 import type { AxiosResponse } from "axios";
 
-import type { AddTaskApiBody, TaskSearchApiSuccessResponse } from "@/pages/api/task";
+import type { AddTaskApiBody, TaskSearchApiSuccessResponse, UpdateTaskApiBody } from "@/pages/api/task";
 import type { Task } from "@/utils/task";
 
 export const useTask = (id: number | string | undefined) => {
     let taskId: number | undefined = undefined;
 
-    if (typeof id === "string") {        
+    if (typeof id === "string") {
         taskId = parseInt(id);
     }
 
@@ -92,6 +92,35 @@ const addTask = async ({ title, body }: AddTaskApiBody) => {
         AxiosResponse<Task>,
         AddTaskApiBody
     >("/api/task", { title, body });
+
+    return data;
+};
+
+export const useUpdateTask = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: updateTask,
+        onSuccess: (data) => {
+            queryClient.setQueryData(taskQueryKeys.detail(data.id), data);
+
+            void queryClient.invalidateQueries({
+                queryKey: taskQueryKeys.detail(data.id),
+            });
+
+            void queryClient.invalidateQueries({
+                queryKey: taskQueryKeys.lists(),
+            });
+        },
+    });
+};
+
+const updateTask = async (payload: UpdateTaskApiBody) => {
+    const { data } = await axios.patch<
+        Task,
+        AxiosResponse<Task>,
+        UpdateTaskApiBody
+    >("/api/task", payload);
 
     return data;
 };
