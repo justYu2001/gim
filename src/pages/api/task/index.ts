@@ -5,6 +5,7 @@ import { githubApiHandler } from "@/utils/api-handler";
 import type { GitHubApiHandler, GithubApiHandlerErrorMessage } from "@/utils/api-handler";
 import { convertGithubIssueToTask, updateGithubIssue } from "@/utils/github-api";
 import type { GithubIssue } from "@/utils/github-api";
+import { TaskStatuses } from "@/utils/task";
 import type { Task } from "@/utils/task";
 
 export interface TaskSearchApiSuccessResponse {
@@ -82,7 +83,7 @@ interface GitHubCreateIssueApiBody {
     body: string;
 }
 
-const addTask: GitHubApiHandler<Task> = async ({request, response, githubApiClient }) => {
+const addTask: GitHubApiHandler<Task> = async ({ request, response, githubApiClient }) => {
     const parsedBody = addTaskApiBodySchema.parse(request.body);
 
     const { data } = await githubApiClient.post<
@@ -99,7 +100,30 @@ const addTask: GitHubApiHandler<Task> = async ({request, response, githubApiClie
     response.status(201).send(newTask);
 };
 
+const updateTaskApiBodySchema = z.object({
+    id: z.number(),
+    title: z.string().min(1),
+    body: z.string().min(30),
+    status: z.enum(TaskStatuses),
+});
+
+export type UpdateTaskApiBody = z.infer<typeof updateTaskApiBodySchema>;
+
+const updateTask: GitHubApiHandler<Task> = async ({ request,response }) => {
+    const { id, title, body, status } = updateTaskApiBodySchema.parse(request.body);
+
+    const updatedTask = await updateGithubIssue(id, {
+        title,
+        body,
+        state: "open",
+        labels: [status],
+    });
+
+    response.status(200).send(updatedTask);
+};
+
 export default githubApiHandler({
     GET: searchTasks,
     POST: addTask,
+    PATCH: updateTask,
 });
