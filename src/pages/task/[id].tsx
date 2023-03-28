@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import { BsTrashFill } from "react-icons/bs";
 import { MdEdit } from "react-icons/md";
 
 import useModal from "@/hooks/modal";
@@ -12,6 +13,7 @@ import type { Task } from "@/utils/task";
 import EmptyImage from "public/images/empty.png";
 import ErrorImage from "public/images/error.png";
 
+const DeleteTaskDialog = lazy(() => import("@/components/task/DeleteTaskDialog"));
 const EditTaskModal = lazy(() => import("@/components/task/EditTaskModal"));
 
 const TaskDetailPage: NextPage = () => {
@@ -47,7 +49,15 @@ const TaskDetailSkeleton = () => {
                     <div className="mb-4 flex items-end justify-between">
                         <span className="h-6 w-16 rounded-full bg-slate-300" />
 
-                        <EditButton />
+                        <div className="flex space-x-2">
+                            <button className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-400 text-xl text-slate-400 hover:bg-black/10">
+                                <MdEdit />
+                            </button>
+
+                            <button className="flex h-10 w-10 items-center justify-center rounded-md bg-red-500 text-xl text-white">
+                                <BsTrashFill />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -108,7 +118,10 @@ const TaskDetail = ({ task }: TaskDetailProps) => {
                             {task.status.name}
                         </span>
 
-                        <EditButton onClick={toggleModal} />
+                        <div className="flex space-x-2">
+                            <EditButton onClick={toggleModal} />
+                            <DeleteButton taskId={task.id} />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -134,6 +147,29 @@ const EditButton = ({ onClick }: EditButtonProps) => {
         >
             <MdEdit />
         </button>
+    );
+};
+
+interface DeleteButtonProps {
+    taskId: number;
+}
+
+const DeleteButton = ({ taskId }: DeleteButtonProps) => {
+    const [isOpen, toggleModal] = useModal();
+
+    return (
+        <>
+            <button
+                className="flex h-10 w-10 items-center justify-center rounded-md bg-red-500 text-xl text-white"
+                onClick={toggleModal}
+            >
+                <BsTrashFill />
+            </button>
+
+            <Suspense>
+                <DeleteTaskDialog isOpen={isOpen} taskId={taskId} onClose={toggleModal} />
+            </Suspense>
+        </>
     );
 };
 

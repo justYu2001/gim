@@ -125,6 +125,21 @@ const updateTask = async (payload: UpdateTaskApiBody) => {
     return data;
 };
 
+export const useDeleteTask = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deleteTask,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: taskQueryKeys.lists(),
+            });
+        },
+    });
+};
+
+const deleteTask = async (id: number) => axios.delete(`/api/task/${id}`);
+
 const taskQueryKeys = {
     all: () => [{ scope: "tasks" }] as const,
     lists: () => [{ ...taskQueryKeys.all()[0], entity: "list" }] as const,
