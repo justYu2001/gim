@@ -5,7 +5,7 @@ import { githubApiHandler } from "@/utils/api-handler";
 import type { GitHubApiHandler, GithubApiHandlerErrorMessage } from "@/utils/api-handler";
 import { convertGithubIssueToTask, updateGithubIssue } from "@/utils/github-api";
 import type { GithubIssue } from "@/utils/github-api";
-import { TaskStatuses } from "@/utils/task";
+import { TaskOrders, TaskStatuses } from "@/utils/task";
 import type { Task } from "@/utils/task";
 
 export interface TaskSearchApiSuccessResponse {
@@ -19,6 +19,7 @@ const searchTaskQueryParamsSchema = z.object({
     author: z.string().min(1).optional(),
     keyword: z.string().optional(),
     status: z.string().min(1).optional(),
+    order: z.enum(TaskOrders).optional().default("desc"),
     id: z.string().regex(/^[0-9]+$/).optional(),
 });
 
@@ -39,7 +40,7 @@ const searchTasks: GitHubApiHandler<TaskSearchApiResponse> = async ({
     const parameters = new URLSearchParams({
         q: getQueryString(parsedQueryParams),
         sort: "created",
-        order: "desc",
+        order: parsedQueryParams.order,
         per_page: "10",
     });
 

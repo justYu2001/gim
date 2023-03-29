@@ -15,3 +15,6 @@ export interface Task {
 
 export const TaskStatuses = ["Open", "In Progress", "Done"] as const;
 export type TaskStatus = typeof TaskStatuses[number];
+
+export const TaskOrders = ["desc", "asc"] as const;
+export type TaskOrder = typeof TaskOrders[number];
