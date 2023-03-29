@@ -49,6 +49,7 @@ const fetchTask = async ({ queryKey: [{ id }] }: TaskDetailQueryKey): Promise<Ta
 
 interface TaskFilter {
     author?: string;
+    keyword: string;
 }
 
 export const useTasks = (filter: TaskFilter) => {
@@ -61,12 +62,15 @@ export const useTasks = (filter: TaskFilter) => {
 
 type TaskListQueryKeys = QueryFunctionContext<ReturnType<(typeof taskQueryKeys)["list"]>, number>;
 
-const fetchTasks = async ({ queryKey: [{ author }] }: TaskListQueryKeys) => {
+const fetchTasks = async ({ queryKey: [{ author, keyword }] }: TaskListQueryKeys) => {
     if (typeof author === "undefined") {
         throw new Error("author is required");
     }
 
-    const params = new URLSearchParams({ author });
+    const params = new URLSearchParams({
+        author,
+        keyword,
+    });
 
     const { data } = await axios.get<TaskSearchApiSuccessResponse>(`/api/task?${params.toString()}`);
 

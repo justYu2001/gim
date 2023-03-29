@@ -1,8 +1,10 @@
-import { Fragment } from "react";
+import { Fragment, useRef, useState } from "react";
+import type { CompositionEvent, KeyboardEvent } from "react";
 import type { NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { AiOutlineSearch } from "react-icons/ai";
 import { HiOutlinePlus } from "react-icons/hi2";
 
 import Title from "@/components/common/Title";
@@ -12,15 +14,18 @@ import type { Task } from "@/utils/task";
 import ErrorImage from "public/images/error.png";
 
 const TaskListPage: NextPage = () => {
+    const [keyword, setKeyword] = useState("");
+
     return (
         <>
             <Title>任務列表</Title>
 
-            <div className="flex justify-end pt-6 pb-4">
+            <div className="flex items-center space-x-4 pt-6 pb-4 md:items-stretch">
+                <SearchBar onChange={setKeyword} />
                 <AddTaskButton />
             </div>
 
-            <TaskList />
+            <TaskList keyword={keyword} />
         </>
     );
 };
@@ -39,15 +44,91 @@ const AddTaskButton = () => {
     );
 };
 
-const TaskList = () => {
+interface SearchBarProps {
+    onChange: (value: string) => void;
+}
+
+const SearchBar = ({ onChange }: SearchBarProps) => {
+    const { compositionStatus, handleCompositionEvent } = useCompositionEvent();
+
+    const buttonRef = useRef<HTMLButtonElement>(null);
+
+    const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        const isCompositionEnd = compositionStatus.current === "compositionend";
+
+        if (event.key === "Enter" && isCompositionEnd && buttonRef.current) {
+            buttonRef.current.click();
+        }
+    };
+
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleButtonClick = () => {
+        if (inputRef.current) {
+            onChange(inputRef.current.value);
+        }
+    };
+
+    return (
+        <div className="flex flex-1 rounded-md border border-slate-400 pl-2">
+            <input
+                type="text"
+                ref={inputRef}
+                className="flex-1 bg-transparent py-1 px-1 text-lg tracking-wide md:py-0"
+                onKeyDown={handleInputKeyDown}
+                onCompositionStart={handleCompositionEvent}
+                onCompositionUpdate={handleCompositionEvent}
+                onCompositionEnd={handleCompositionEvent}
+            />
+
+            <button
+                ref={buttonRef}
+                className="border-l border-slate-400 px-2 text-slate-400 hover:bg-black/5"
+                onClick={handleButtonClick}
+            >
+                <AiOutlineSearch className="text-2xl" />
+            </button>
+        </div>
+    );
+};
+
+type CompositionStatus = "compositionstart" | "compositionupdate" | "compositionend";
+
+const useCompositionEvent = () => {
+    /**
+     * If we set default status to `compositionstart`, and the developer use the composition
+     * status as a condition for some actions to be executed, the English user will not be
+     * able to meet the condition until the `compositionend` event is triggered.
+     * Therefore, we need to set the default status to `compositionend`.
+     */
+    const compositionStatus = useRef<CompositionStatus>("compositionend");
+
+    const handleCompositionEvent = (event: CompositionEvent<HTMLInputElement>) => {
+        compositionStatus.current = event.type as CompositionStatus;
+    };
+
+    return {
+        compositionStatus,
+        handleCompositionEvent,
+    };
+};
+
+interface TaskListProps {
+    keyword: string;
+}
+
+const TaskList = ({ keyword }: TaskListProps) => {
     const { data: user } = useUser();
 
     const {
         data,
         isLoading,
         isRefetching,
-        isError,
-    } = useTasks({ author: user?.username });
+        isError
+    } = useTasks({
+        author: user?.username,
+        keyword,
+    });
 
     if (isLoading || isRefetching) {
         return (
