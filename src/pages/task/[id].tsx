@@ -126,7 +126,7 @@ const TaskDetail = ({ task }: TaskDetailProps) => {
                 </div>
             </div>
 
-            <pre className="overflow-y-scroll whitespace-pre-wrap px-0.5 py-4">{task.body}</pre>
+            <pre className="overflow-y-scroll whitespace-pre-wrap break-all px-0.5 py-4">{task.body}</pre>
 
             <Suspense>
                 <EditTaskModal isOpen={isOpen} task={task} onClose={toggleModal} />
