@@ -20,7 +20,7 @@ const TaskListPage: NextPage = () => {
         <>
             <Title>任務列表</Title>
 
-            <div className="flex space-x-4 pt-6 pb-4">
+            <div className="flex items-center space-x-4 pt-6 pb-4 md:items-stretch">
                 <SearchBar onChange={setKeyword} />
                 <AddTaskButton />
             </div>
