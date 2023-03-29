@@ -5,19 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { AiOutlineSearch } from "react-icons/ai";
-import { HiOutlinePlus } from "react-icons/hi2";
+import { HiOutlineArrowLongDown, HiOutlineArrowLongUp, HiOutlinePlus } from "react-icons/hi2";
 
 import TabList from "@/components/common/TabList";
 import Title from "@/components/common/Title";
 import { useTasks } from "@/hooks/task";
 import { useUser } from "@/hooks/user";
 import { TaskStatuses } from "@/utils/task";
-import type { Task } from "@/utils/task";
+import type { Task, TaskOrder } from "@/utils/task";
 import ErrorImage from "public/images/error.png";
 
 const TaskListPage: NextPage = () => {
     const [keyword, setKeyword] = useState("");
     const [status, setStatus] = useState("All");
+    const [order, setOrder] = useState<TaskOrder>("desc");
 
     return (
         <>
@@ -27,10 +28,16 @@ const TaskListPage: NextPage = () => {
                 <SearchBar onChange={setKeyword} />
                 <AddTaskButton />
             </div>
-            
-            <TabList tabs={["All", ...TaskStatuses]} activeTab={status} onChange={setStatus} />
 
-            <TaskList keyword={keyword} status={status} />
+            <div className="relative">
+                <TabList tabs={["All", ...TaskStatuses]} activeTab={status} onChange={setStatus} />
+
+                <div className="absolute top-3 right-0.5">
+                    <OrderButton order={order} onClick={setOrder} />
+                </div>
+            </div>
+
+            <TaskList keyword={keyword} status={status} order={order} />
         </>
     );
 };
@@ -118,12 +125,42 @@ const useCompositionEvent = () => {
     };
 };
 
+interface OrderButtonProps {
+    order: TaskOrder;
+    onClick: (order: TaskOrder) => void;
+}
+
+const OrderButton = ({ order, onClick }: OrderButtonProps) => {
+    const handleButtonClick = () => {
+        const newOrder = order === "desc" ? "asc" : "desc";
+        onClick(newOrder);
+    };
+
+    return (
+        <div className="flex items-center px-2 font-medium tracking-wide text-slate-400">
+            <span className="hidden md:inline">建立時間</span>
+
+            <button
+                className="ml-0.5 rounded-md p-1 text-2xl hover:bg-black/10"
+                onClick={handleButtonClick}
+            >
+                {order === "desc" ? (
+                    <HiOutlineArrowLongDown />
+                ) : (
+                    <HiOutlineArrowLongUp />
+                )}
+            </button>
+        </div>
+    );
+};
+
 interface TaskListProps {
     keyword: string;
     status: string;
+    order: TaskOrder;
 }
 
-const TaskList = ({ keyword, status }: TaskListProps) => {
+const TaskList = ({ keyword, status, order }: TaskListProps) => {
     const { data: user } = useUser();
 
     const {
@@ -135,6 +172,7 @@ const TaskList = ({ keyword, status }: TaskListProps) => {
         author: user?.username,
         keyword,
         status,
+        order,
     });
 
     if (isLoading || isRefetching) {

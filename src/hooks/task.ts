@@ -4,7 +4,7 @@ import axios from "axios";
 import type { AxiosResponse } from "axios";
 
 import type { AddTaskApiBody, TaskSearchApiSuccessResponse, UpdateTaskApiBody } from "@/pages/api/task";
-import type { Task } from "@/utils/task";
+import type { Task, TaskOrder } from "@/utils/task";
 
 export const useTask = (id: number | string | undefined) => {
     let taskId: number | undefined = undefined;
@@ -51,6 +51,7 @@ interface TaskFilter {
     author?: string;
     keyword: string;
     status: string;
+    order: TaskOrder;
 }
 
 export const useTasks = (filter: TaskFilter) => {
@@ -63,7 +64,7 @@ export const useTasks = (filter: TaskFilter) => {
 
 type TaskListQueryKeys = QueryFunctionContext<ReturnType<(typeof taskQueryKeys)["list"]>, number>;
 
-const fetchTasks = async ({ queryKey: [{ author, keyword, status }] }: TaskListQueryKeys) => {
+const fetchTasks = async ({ queryKey: [{ author, keyword, status, order }] }: TaskListQueryKeys) => {
     if (typeof author === "undefined") {
         throw new Error("author is required");
     }
@@ -71,7 +72,8 @@ const fetchTasks = async ({ queryKey: [{ author, keyword, status }] }: TaskListQ
     const params = new URLSearchParams({
         author,
         keyword,
-        status
+        status,
+        order,
     });
 
     const { data } = await axios.get<TaskSearchApiSuccessResponse>(`/api/task?${params.toString()}`);
