@@ -17,6 +17,7 @@ type TaskSearchApiResponse = TaskSearchApiSuccessResponse | GithubApiHandlerErro
 
 const searchTaskQueryParamsSchema = z.object({
     author: z.string().min(1).optional(),
+    keyword: z.string().optional(),
     id: z.string().regex(/^[0-9]+$/).optional(),
 });
 
@@ -53,11 +54,15 @@ const searchTasks: GitHubApiHandler<TaskSearchApiResponse> = async ({
     });
 };
 
-const getQueryString = ({ author, id }: SearchTaskQueryParams) => {
+const getQueryString = ({ author, keyword, id }: SearchTaskQueryParams) => {
     let queryString = `is:issue repo:justYu2001/gim-issues`;
 
     if (hasParam(author)) {
         queryString += ` author:${author} is:open`;
+    }
+
+    if (hasParam(keyword) && keyword !== "") {
+        queryString += ` ${keyword} in:title,body`;
     }
 
     if (hasParam(id)) {
