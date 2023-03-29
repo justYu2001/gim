@@ -7,14 +7,17 @@ import Link from "next/link";
 import { AiOutlineSearch } from "react-icons/ai";
 import { HiOutlinePlus } from "react-icons/hi2";
 
+import TabList from "@/components/common/TabList";
 import Title from "@/components/common/Title";
 import { useTasks } from "@/hooks/task";
 import { useUser } from "@/hooks/user";
+import { TaskStatuses } from "@/utils/task";
 import type { Task } from "@/utils/task";
 import ErrorImage from "public/images/error.png";
 
 const TaskListPage: NextPage = () => {
     const [keyword, setKeyword] = useState("");
+    const [status, setStatus] = useState("All");
 
     return (
         <>
@@ -24,8 +27,10 @@ const TaskListPage: NextPage = () => {
                 <SearchBar onChange={setKeyword} />
                 <AddTaskButton />
             </div>
+            
+            <TabList tabs={["All", ...TaskStatuses]} activeTab={status} onChange={setStatus} />
 
-            <TaskList keyword={keyword} />
+            <TaskList keyword={keyword} status={status} />
         </>
     );
 };
@@ -115,9 +120,10 @@ const useCompositionEvent = () => {
 
 interface TaskListProps {
     keyword: string;
+    status: string;
 }
 
-const TaskList = ({ keyword }: TaskListProps) => {
+const TaskList = ({ keyword, status }: TaskListProps) => {
     const { data: user } = useUser();
 
     const {
@@ -128,6 +134,7 @@ const TaskList = ({ keyword }: TaskListProps) => {
     } = useTasks({
         author: user?.username,
         keyword,
+        status,
     });
 
     if (isLoading || isRefetching) {
