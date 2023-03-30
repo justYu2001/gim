@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { QueryFunctionContext } from "@tanstack/react-query";
+import type { GetNextPageParamFunction, QueryFunctionContext } from "@tanstack/react-query";
 import axios from "axios";
 import type { AxiosResponse } from "axios";
 
@@ -58,13 +58,17 @@ export const useTasks = (filter: TaskFilter) => {
     return useInfiniteQuery({
         queryKey: taskQueryKeys.list(filter),
         queryFn: fetchTasks,
+        getNextPageParam,
         enabled: Boolean(filter.author),
     });
 };
 
 type TaskListQueryKeys = QueryFunctionContext<ReturnType<(typeof taskQueryKeys)["list"]>, number>;
 
-const fetchTasks = async ({ queryKey: [{ author, keyword, status, order }] }: TaskListQueryKeys) => {
+const fetchTasks = async ({
+    queryKey: [{ author, keyword, status, order }],
+    pageParam = 1 
+}: TaskListQueryKeys) => {
     if (typeof author === "undefined") {
         throw new Error("author is required");
     }
@@ -74,11 +78,20 @@ const fetchTasks = async ({ queryKey: [{ author, keyword, status, order }] }: Ta
         keyword,
         status,
         order,
+        page: pageParam.toString(),
     });
 
     const { data } = await axios.get<TaskSearchApiSuccessResponse>(`/api/task?${params.toString()}`);
 
     return data;
+};
+
+const getNextPageParam: GetNextPageParamFunction<TaskSearchApiSuccessResponse> = (lastPages, allPages) => {
+    if (lastPages.totalCount - allPages.length * 10 > 0) {
+        return allPages.length + 1;
+    }
+
+    return undefined;
 };
 
 export const useAddTask = () => {

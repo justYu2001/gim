@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from "react";
+import { Fragment, forwardRef, useEffect, useRef, useState } from "react";
 import type { CompositionEvent, KeyboardEvent } from "react";
 import type { NextPage } from "next";
 import Image from "next/image";
@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { AiOutlineSearch } from "react-icons/ai";
 import { HiOutlineArrowLongDown, HiOutlineArrowLongUp, HiOutlinePlus } from "react-icons/hi2";
+import { TbReload } from "react-icons/tb";
 
 import TabList from "@/components/common/TabList";
 import Title from "@/components/common/Title";
@@ -167,13 +168,47 @@ const TaskList = ({ keyword, status, order }: TaskListProps) => {
         data,
         isLoading,
         isRefetching,
-        isError
+        isFetchingNextPage,
+        isError,
+        hasNextPage,
+        fetchNextPage,
     } = useTasks({
         author: user?.username,
         keyword,
         status,
         order,
     });
+
+    const lastTaskListItemRef = useRef<HTMLLIElement>(null);
+
+    useEffect(() => {
+        const observerOptions: IntersectionObserverInit = {
+            threshold: 1,
+        };
+
+        const callback: IntersectionObserverCallback = (entries) => {
+            const entry = entries[0];
+
+            if (entry && entry.isIntersecting) {
+                void fetchNextPage();
+            }
+        };
+
+        const observer = new IntersectionObserver(callback, observerOptions);
+
+        /**
+         * The Ref of the last task should only be updated when there are
+         * more tasks to be loaded ,and after new tasks are loaded or the
+         * page is switched back to the homepage after the user updates data.
+         */
+        if (lastTaskListItemRef.current && hasNextPage && (!isFetchingNextPage || isRefetching)) {
+            const lastTaskListItem = lastTaskListItemRef.current;
+
+            observer.observe(lastTaskListItem);
+
+            return () => observer.unobserve(lastTaskListItem);
+        }
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage, isRefetching]);
 
     if (isLoading || isRefetching) {
         return (
@@ -189,13 +224,22 @@ const TaskList = ({ keyword, status, order }: TaskListProps) => {
 
     return (
         <ul className="h-full flex-1 overflow-y-scroll bg-slate-100">
-            {data.pages.map((page, pageIndex) => (
+            {data.pages.map((page, pageIndex, pages) => (
                 <Fragment key={pageIndex}>
-                    {page.tasks.map((task) => (
-                        <TaskListItem key={task.id} task={task} />
-                    ))}
+                    {page.tasks.map((task, taskIndex) => {
+                        const isLastTask = pageIndex === pages.length - 1 && taskIndex === 9;
+                        const ref = isLastTask ? { ref: lastTaskListItemRef } : {};
+
+                        return (
+                            <TaskListItem key={task.id} task={task} {...ref} />
+                        );
+                    })}
                 </Fragment>
             ))}
+
+            {isFetchingNextPage && <TaskListItemSkeletons length={3} />}
+
+            {isError && <NewTaskLoadingErrorMessage onReload={() => void fetchNextPage()} />}
         </ul>
     );
 };
@@ -229,19 +273,42 @@ interface TaskListItemProps {
     task: Task;
 }
 
-const TaskListItem = ({ task }: TaskListItemProps) => {
-    return (
-        <li className="border-b border-slate-300 bg-white last:border-none hover:cursor-pointer hover:bg-gray-100">
-            <Link href={`/task/${task.id}`} className="block p-3">
-                <h3 className="text-xl font-medium">{task.title}</h3>
+const TaskListItem = forwardRef<HTMLLIElement, TaskListItemProps>(({ task }, ref) => (
+    <li
+        ref={ref}
+        className="border-b border-slate-300 bg-white last:border-none hover:cursor-pointer hover:bg-gray-100"
+    >
+        <Link href={`/task/${task.id}`} className="block p-3">
+            <h3 className="text-xl font-medium">{task.title}</h3>
 
-                <span
-                    style={{ backgroundColor: `#${task.status.color}` }}
-                    className="-ml-1 mt-2 inline-block rounded-full py-0.5 px-3 text-sm font-medium text-white"
-                >
-                    {task.status.name}
-                </span>
-            </Link>
+            <span
+                style={{ backgroundColor: `#${task.status.color}` }}
+                className="-ml-1 mt-2 inline-block rounded-full py-0.5 px-3 text-sm font-medium text-white"
+            >
+                {task.status.name}
+            </span>
+        </Link>
+    </li>
+));
+
+TaskListItem.displayName = "TaskListItem";
+
+interface NewTaskLoadingErrorMessageProps {
+    onReload: () => void;
+}
+
+const NewTaskLoadingErrorMessage = ({ onReload }: NewTaskLoadingErrorMessageProps) => {
+    return (
+        <li className="flex flex-col items-center bg-white py-4 tracking-wide">
+            <p className="mb-1 text-xl">喔不！發生了一些問題</p>
+
+            <button
+                className="flex items-center font-medium text-slate-400"
+                onClick={onReload}
+            >
+                重新載入
+                <TbReload />
+            </button>
         </li>
     );
 };
