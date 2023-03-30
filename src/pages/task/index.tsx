@@ -279,7 +279,7 @@ const TaskListItem = forwardRef<HTMLLIElement, TaskListItemProps>(({ task }, ref
         className="border-b border-slate-300 bg-white last:border-none hover:cursor-pointer hover:bg-gray-100"
     >
         <Link href={`/task/${task.id}`} className="block p-3">
-            <h3 className="text-xl font-medium">{task.title}</h3>
+            <h3 className="break-all text-xl font-medium">{task.title}</h3>
 
             <span
                 style={{ backgroundColor: `#${task.status.color}` }}
