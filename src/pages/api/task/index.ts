@@ -20,6 +20,7 @@ const searchTaskQueryParamsSchema = z.object({
     keyword: z.string().optional(),
     status: z.string().min(1).optional(),
     order: z.enum(TaskOrders).optional().default("desc"),
+    page: z.string().min(1).optional().default("1"),
     id: z.string().regex(/^[0-9]+$/).optional(),
 });
 
@@ -42,6 +43,7 @@ const searchTasks: GitHubApiHandler<TaskSearchApiResponse> = async ({
         sort: "created",
         order: parsedQueryParams.order,
         per_page: "10",
+        page: parsedQueryParams.page,
     });
 
     const { data } = await githubApiClient.get<GithubSearchIssueApiResponse>(
