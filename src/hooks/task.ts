@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { GetNextPageParamFunction, QueryFunctionContext } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import type { AxiosResponse } from "axios";
 
 import type { AddTaskApiBody, TaskSearchApiSuccessResponse, UpdateTaskApiBody } from "@/pages/api/task";
@@ -17,7 +17,17 @@ export const useTask = (id: number | string | undefined) => {
         queryKey: taskQueryKeys.detail(taskId),
         queryFn: fetchTask,
         enabled: typeof taskId === "number",
-        retry: taskId && !isNaN(taskId),
+        retry: (failureCount, error) => {
+            if (error instanceof AxiosError && error.response?.status === 404) {
+                return false;
+            }
+
+            if (taskId) {
+                return !isNaN(taskId);
+            }
+
+            return false;
+        },
     });
 };
 
@@ -28,27 +38,12 @@ const fetchTask = async ({ queryKey: [{ id }] }: TaskDetailQueryKey): Promise<Ta
         throw new Error("id is required");
     }
 
-    const { data } = await axios.get<TaskSearchApiSuccessResponse>(`/api/task?id=${id}`);
-    const task = data.tasks[0];
+    const { data } = await axios.get<Task>(`/api/task/${id}`);
 
-    if (!task) {
-        return {
-            id: 0,
-            title: "",
-            body: "",
-            state: "closed",
-            status: {
-                color: "fff",
-                name: "Open",
-            },
-        };
-    }
-
-    return task;
+    return data;
 };
 
 interface TaskFilter {
-    author?: string;
     keyword: string;
     status: string;
     order: TaskOrder;
@@ -59,22 +54,16 @@ export const useTasks = (filter: TaskFilter) => {
         queryKey: taskQueryKeys.list(filter),
         queryFn: fetchTasks,
         getNextPageParam,
-        enabled: Boolean(filter.author),
     });
 };
 
 type TaskListQueryKeys = QueryFunctionContext<ReturnType<(typeof taskQueryKeys)["list"]>, number>;
 
 const fetchTasks = async ({
-    queryKey: [{ author, keyword, status, order }],
+    queryKey: [{ keyword, status, order }],
     pageParam = 1 
 }: TaskListQueryKeys) => {
-    if (typeof author === "undefined") {
-        throw new Error("author is required");
-    }
-
     const params = new URLSearchParams({
-        author,
         keyword,
         status,
         order,

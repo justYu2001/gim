@@ -5,6 +5,7 @@ import type { AxiosRequestConfig } from "axios";
 import { z } from "zod";
 
 import { env } from "@/env.mjs";
+import { createGithubApiClient, getGithubUser } from "@/utils/github-api";
 import { withSessionRoute } from "@/utils/session";
 import { formatZodErrors } from "@/utils/zod";
 
@@ -21,6 +22,11 @@ const callbackApiHandler: NextApiHandler = async (request, response) => {
         const authCode = getAuthCode(request.query);
         const accessToken = await getAccessToken(authCode);
         request.session.accessToken = accessToken;
+
+        const githubApiClient = createGithubApiClient(accessToken);
+        const { username } = await getGithubUser(githubApiClient);
+        request.session.username = username;
+
         await request.session.save();
         return response.redirect("/task");
     } catch (error) {

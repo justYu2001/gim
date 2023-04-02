@@ -11,7 +11,6 @@ import { TbReload } from "react-icons/tb";
 import TabList from "@/components/common/TabList";
 import Title from "@/components/common/Title";
 import { useTasks } from "@/hooks/task";
-import { useUser } from "@/hooks/user";
 import { TaskStatuses } from "@/utils/task";
 import type { Task, TaskOrder } from "@/utils/task";
 import ErrorImage from "public/images/error.png";
@@ -162,8 +161,6 @@ interface TaskListProps {
 }
 
 const TaskList = ({ keyword, status, order }: TaskListProps) => {
-    const { data: user } = useUser();
-
     const {
         data,
         isLoading,
@@ -173,7 +170,6 @@ const TaskList = ({ keyword, status, order }: TaskListProps) => {
         hasNextPage,
         fetchNextPage,
     } = useTasks({
-        author: user?.username,
         keyword,
         status,
         order,
