@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { AxiosResponse } from "axios";
+import type { AxiosInstance, AxiosResponse } from "axios";
 
 import { env } from "@/env.mjs";
 import type { Task } from "@/utils/task";
@@ -14,6 +14,41 @@ export const createGithubApiClient = (accessToken = env.ADMIN_ACCESS_TOKEN) => {
         },
     });
 }
+
+interface User {
+    username: string;
+    avatarUrl: string;
+}
+
+interface GitHubUserApiResponse {
+    login: string;
+    avatar_url: string;
+}
+
+export const getGithubUser = async (githubApiClient: AxiosInstance): Promise<User> => {
+    const { data } = await githubApiClient.get<GitHubUserApiResponse>("/user");
+
+    return {
+        username: data.login,
+        avatarUrl: data.avatar_url,
+    };
+}
+
+interface GithubSearchIssueApiResponse {
+    total_count: number;
+    items: GithubIssue[];
+}
+
+export const searchGithubIssues = async (githubApiClient: AxiosInstance, paramsString: string) => {
+    const { data } = await githubApiClient.get<GithubSearchIssueApiResponse>(
+        `/search/issues?${paramsString}`
+    );
+
+    return { 
+        totalCount: data.total_count,
+        issues: data.items,
+     };
+};
 
 const GithubIssueStates = ["open", "closed"] as const;
 export type GithubIssueState = typeof GithubIssueStates[number];

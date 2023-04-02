@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { githubApiHandler } from "@/utils/api-handler";
 import type { GitHubApiHandler, GithubApiHandlerErrorMessage } from "@/utils/api-handler";
-import { convertGithubIssueToTask, updateGithubIssue } from "@/utils/github-api";
+import { convertGithubIssueToTask, searchGithubIssues, updateGithubIssue } from "@/utils/github-api";
 import type { GithubIssue } from "@/utils/github-api";
 import { TaskOrders, TaskStatuses } from "@/utils/task";
 import type { Task } from "@/utils/task";
@@ -16,54 +16,49 @@ export interface TaskSearchApiSuccessResponse {
 type TaskSearchApiResponse = TaskSearchApiSuccessResponse | GithubApiHandlerErrorMessage;
 
 const searchTaskQueryParamsSchema = z.object({
-    author: z.string().min(1).optional(),
     keyword: z.string().optional(),
     status: z.string().min(1).optional(),
     order: z.enum(TaskOrders).optional().default("desc"),
     page: z.string().min(1).optional().default("1"),
-    id: z.string().regex(/^[0-9]+$/).optional(),
 });
 
 type SearchTaskQueryParams = z.infer<typeof searchTaskQueryParamsSchema>;
-
-interface GithubSearchIssueApiResponse {
-    total_count: number;
-    items: GithubIssue[];
-}
 
 const searchTasks: GitHubApiHandler<TaskSearchApiResponse> = async ({
     request,
     response,
     githubApiClient,
 }) => {
+    const { username } = request.session;
+
+    if (typeof username === "undefined") {
+        return response.status(401).send({
+            message: "Unauthorized",
+        });
+    }
+
     const parsedQueryParams = searchTaskQueryParamsSchema.parse(request.query);
 
-    const parameters = new URLSearchParams({
-        q: getQueryString(parsedQueryParams),
+    const params = new URLSearchParams({
+        q: getQueryString(username, parsedQueryParams),
         sort: "created",
         order: parsedQueryParams.order,
         per_page: "10",
         page: parsedQueryParams.page,
     });
 
-    const { data } = await githubApiClient.get<GithubSearchIssueApiResponse>(
-        `/search/issues?${parameters.toString()}`
-    );
+    const { totalCount, issues } = await searchGithubIssues(githubApiClient, params.toString());
 
-    const tasks = data.items.map<Task>((issue) => convertGithubIssueToTask(issue));
+    const tasks = issues.map<Task>((issue) => convertGithubIssueToTask(issue));
 
     response.status(200).send({
-        totalCount: data.total_count,
+        totalCount,
         tasks,
     });
 };
 
-const getQueryString = ({ author, keyword, status, id }: SearchTaskQueryParams) => {
-    let queryString = `is:issue repo:justYu2001/gim-issues`;
-
-    if (hasParam(author)) {
-        queryString += ` author:${author} is:open`;
-    }
+const getQueryString = (author: string, { keyword, status }: SearchTaskQueryParams) => {
+    let queryString = `author:${author} is:open is:issue repo:justYu2001/gim-issues`;
 
     if (hasParam(keyword) && keyword !== "") {
         queryString += ` ${keyword} in:title,body`;
@@ -71,10 +66,6 @@ const getQueryString = ({ author, keyword, status, id }: SearchTaskQueryParams) 
 
     if (hasParam(status) && status.toLowerCase() !== "all") {
         queryString += ` label:"${status}"`;
-    }
-
-    if (hasParam(id)) {
-        queryString += ` issue: ${id}`;
     }
 
     return queryString;

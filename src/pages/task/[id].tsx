@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import { AxiosError } from "axios";
 import { BsTrashFill } from "react-icons/bs";
 import { MdEdit } from "react-icons/md";
 
@@ -20,21 +21,21 @@ const TaskDetailPage: NextPage = () => {
     const router = useRouter();
     const taskId = router.query.id as string | undefined;
 
-    const { data: task, isLoading } = useTask(taskId);
+    const { data: task, isLoading, isError, error } = useTask(taskId);
 
     if (isLoading) {
         return <TaskDetailSkeleton />;
     }
 
-    if (task) {
-        if (task.state === "closed") {
+    if (isError) {
+        if (error instanceof AxiosError && error.response?.status === 404) {
             return <NoTaskPage />;
         }
 
-        return <TaskDetail task={task} />;
+        return <TaskLoadingErrorMessage />;
     }
 
-    return <TaskLoadingErrorMessage />;
+    return <TaskDetail task={task} />;     
 };
 
 export default TaskDetailPage;
