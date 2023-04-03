@@ -15,8 +15,8 @@ import TaskFormTextArea from "@/components/task/TaskFormTextArea";
 import { useAddTask } from "@/hooks/task";
 
 const newTaskSchema = z.object({
-    title: z.string().min(1),
-    body: z.string().min(30),
+    title: z.string().trim().min(1),
+    body: z.string().trim().min(30),
 });
 
 type NewTask = z.infer<typeof newTaskSchema>;

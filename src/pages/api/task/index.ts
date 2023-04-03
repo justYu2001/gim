@@ -17,9 +17,9 @@ type TaskSearchApiResponse = TaskSearchApiSuccessResponse | GithubApiHandlerErro
 
 const searchTaskQueryParamsSchema = z.object({
     keyword: z.string().optional(),
-    status: z.string().min(1).optional(),
-    order: z.enum(TaskOrders).optional().default("desc"),
-    page: z.string().min(1).optional().default("1"),
+    status: z.string().min(1),
+    order: z.enum(TaskOrders),
+    page: z.string().min(1),
 });
 
 type SearchTaskQueryParams = z.infer<typeof searchTaskQueryParamsSchema>;
@@ -76,8 +76,8 @@ const hasParam = (param: string | undefined): param is string => {
 };
 
 const addTaskApiBodySchema = z.object({
-    title: z.string().min(1),
-    body: z.string().min(30),
+    title: z.string().trim().min(1),
+    body: z.string().trim().min(30),
 });
 
 export type AddTaskApiBody = z.infer<typeof addTaskApiBodySchema>;
@@ -106,8 +106,8 @@ const addTask: GitHubApiHandler<Task> = async ({ request, response, githubApiCli
 
 const updateTaskApiBodySchema = z.object({
     id: z.number(),
-    title: z.string().min(1),
-    body: z.string().min(30),
+    title: z.string().trim().min(1),
+    body: z.string().trim().min(30),
     status: z.enum(TaskStatuses),
 });
 

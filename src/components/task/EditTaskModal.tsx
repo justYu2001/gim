@@ -15,8 +15,8 @@ import type { Task, TaskStatus } from "@/utils/task";
 
 const updatedTaskSchema = z.object({
     id: z.number(),
-    title: z.string().min(1),
-    body: z.string().min(30),
+    title: z.string().trim().min(1),
+    body: z.string().trim().min(30),
     status: z.enum(TaskStatuses),
 });
 
