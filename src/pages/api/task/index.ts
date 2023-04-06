@@ -66,6 +66,8 @@ const getQueryString = (author: string, { keyword, status }: SearchTaskQueryPara
 
     if (hasParam(status) && status.toLowerCase() !== "all") {
         queryString += ` label:"${status}"`;
+    } else if (hasParam(status) && status.toLowerCase() === "all") {
+        queryString += ` label:Open,"In Progress",Done`;
     }
 
     return queryString;
