@@ -17,7 +17,8 @@ const server = z.object({
  * built with invalid env vars. To expose them to the client, prefix them with `NEXT_PUBLIC_`.
  */
 const client = z.object({
-  // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().url(),
+  NEXT_PUBLIC_COMMIT_SHA: z.string().default(''),
 });
 
 /**
@@ -32,7 +33,8 @@ const processEnv = {
   CLIENT_SECRET: process.env.CLIENT_SECRET,
   SECRET_COOKIE_PASSWORD: process.env.SECRET_COOKIE_PASSWORD,
   ADMIN_ACCESS_TOKEN: process.env.ADMIN_ACCESS_TOKEN,
-  // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+  NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  NEXT_PUBLIC_COMMIT_SHA: process.env.NEXT_PUBLIC_COMMIT_SHA,
 };
 
 // Don't touch the part below
