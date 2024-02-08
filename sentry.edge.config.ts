@@ -9,7 +9,7 @@ import { env } from "@/env.mjs";
 
 Sentry.init({
   dsn: env.NEXT_PUBLIC_SENTRY_DSN,
-  release: env.NEXT_PUBLIC_COMMIT_SHA,
+  release: `${env.NEXT_PUBLIC_VERCEL_ENV}@${env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA}`,
 
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: 1,

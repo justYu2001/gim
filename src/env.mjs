@@ -18,7 +18,8 @@ const server = z.object({
  */
 const client = z.object({
   NEXT_PUBLIC_SENTRY_DSN: z.string().url(),
-  NEXT_PUBLIC_COMMIT_SHA: z.string().default(''),
+  NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: z.string().default(''),
+  NEXT_PUBLIC_VERCEL_ENV: z.string().default('local'),
 });
 
 /**
@@ -34,7 +35,8 @@ const processEnv = {
   SECRET_COOKIE_PASSWORD: process.env.SECRET_COOKIE_PASSWORD,
   ADMIN_ACCESS_TOKEN: process.env.ADMIN_ACCESS_TOKEN,
   NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  NEXT_PUBLIC_COMMIT_SHA: process.env.NEXT_PUBLIC_COMMIT_SHA,
+  NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA,
+  NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
 };
 
 // Don't touch the part below
