@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
 import type { AxiosInstance, Method } from "axios";
 import { ZodError } from "zod";
@@ -42,8 +43,8 @@ export const githubApiHandler = (handlers: GithubApiMethodHandler) => {
         try {
             await handler({ request, response, githubApiClient });
         } catch (error) {
+            Sentry.captureException(error);
             const { statusCode, message } = handleGithubApiHandlerError(error);
-            console.error(message);
             response.status(statusCode).send({ message });
         }
     };
