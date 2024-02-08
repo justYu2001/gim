@@ -1,5 +1,7 @@
 import type { NextApiHandler } from "next";
 
+import * as Sentry from "@sentry/nextjs";
+
 import { withSessionRoute } from "@/utils/session";
 
 const signOutApiHandler: NextApiHandler = (request, response) => {
@@ -11,7 +13,7 @@ const signOutApiHandler: NextApiHandler = (request, response) => {
         request.session.destroy();
         return response.redirect(302, "/");
     } catch (error) {
-        console.error(error);
+        Sentry.captureException(error);
         return response.redirect(302, "/error");
     }
 };

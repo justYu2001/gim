@@ -1,5 +1,6 @@
 import type { NextApiHandler, NextApiRequest } from "next";
 
+import * as Sentry from "@sentry/nextjs";
 import axios from "axios";
 import type { AxiosRequestConfig } from "axios";
 import { z } from "zod";
@@ -30,12 +31,7 @@ const callbackApiHandler: NextApiHandler = async (request, response) => {
         await request.session.save();
         return response.redirect("/task");
     } catch (error) {
-        if (error instanceof GitHubAuthError) {
-            console.error(error);
-        } else if (error instanceof Error) {
-            console.error(error);
-        }
-
+        Sentry.captureException(error);
         return response.redirect("/error");
     }
 };

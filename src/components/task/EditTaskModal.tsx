@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
@@ -84,7 +85,8 @@ const EditTaskForm = ({ formMethods, task, onSubmit }: UpdateTaskFormProps) => {
                     keepErrors: false,
                 })
             },
-            onError: () => {
+            onError: (error) => {
+                Sentry.captureException(error);
                 setError("root", {
                     message: "喔不！發生了一些問題。工程師正在全力搶修中，請稍後重試。",
                 });
