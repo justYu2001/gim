@@ -28,12 +28,7 @@ export const middleware = async (request: NextRequest) => {
         return response;
     }
 
-    const isProduction = env.NEXT_PUBLIC_VERCEL_ENV === "production";
     const isIndexPage = request.nextUrl.pathname === "/";
-
-    if (isProduction && isIndexPage && request.url !== env.OAUTH_REGISTERED_URL) {
-        return NextResponse.redirect(new URL("/", env.OAUTH_REGISTERED_URL));
-    }
 
     if (accessToken && isIndexPage) {
         return NextResponse.redirect(new URL("/task", request.url));
