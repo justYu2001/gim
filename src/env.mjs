@@ -10,7 +10,6 @@ const server = z.object({
   CLIENT_SECRET: z.string().min(1),
   SECRET_COOKIE_PASSWORD: z.string().min(32),
   ADMIN_ACCESS_TOKEN: z.string().startsWith("ghp_"),
-  OAUTH_REGISTERED_URL: z.string().url(),
 });
 
 /**
@@ -20,7 +19,7 @@ const server = z.object({
 const client = z.object({
   NEXT_PUBLIC_SENTRY_DSN: z.string().url(),
   NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: z.string().default(''),
-  NEXT_PUBLIC_VERCEL_ENV: z.enum(['production', 'preview', 'development']).default('development'),
+  NEXT_PUBLIC_VERCEL_ENV: z.string().default('local'),
 });
 
 /**
@@ -31,7 +30,6 @@ const client = z.object({
  */
 const processEnv = {
   NODE_ENV: process.env.NODE_ENV,
-  OAUTH_REGISTERED_URL: process.env.OAUTH_REGISTERED_URL,
   CLIENT_ID: process.env.CLIENT_ID,
   CLIENT_SECRET: process.env.CLIENT_SECRET,
   SECRET_COOKIE_PASSWORD: process.env.SECRET_COOKIE_PASSWORD,
